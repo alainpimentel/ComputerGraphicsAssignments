@@ -1,13 +1,18 @@
-
 #include <iostream>
 #include <math.h>
 #include <time.h>
 #include <GL/glut.h>
 
+/* QIUESTION 
+ *
+ * 1. If the user pressed D or U at the middle of choosing points, what should happen? redraw at that point or just adjust current triangle
+ * TODO: drag a point to a new position
+ */
+
 const int screenHeight = 600;
 const int screenWidth = 800;
 int numberDots = 256;
-
+static int numCorners = 0;
 
 // Holds a point
 struct GLintPoint{
@@ -67,7 +72,7 @@ void myKeyboard(unsigned char ch, int, int) {
 
 void myMouse(int button, int state, int x, int y) {
 	std::cout << "DOWNs\n";
-	static int numCorners = 0;
+	
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		std::cout << "DOWN\n";
 		corner[numCorners].x = x;
@@ -78,6 +83,14 @@ void myMouse(int button, int state, int x, int y) {
 		}
 	}
 	glFlush();
+}
+
+void myMovedMouse(int x, int y) {
+	std::cout << "Dragging\n";
+	if (corner != NULL) {
+		if (corner[0].x == x && corner[0].y == y)
+			std::cout << "Draggin first point\n";
+	}
 }
 
 // Initializes various values
@@ -106,6 +119,7 @@ int main(int argc, char** argv) {
 	// register the callback functions
 	glutDisplayFunc(stuff);
 	glutMouseFunc(myMouse);
+	glutMotionFunc(myMovedMouse);
 	glutKeyboardFunc(myKeyboard);
 	myInit(); // additional initializations as necessary
 	glutMainLoop(); 	// go into a perpetual loop
