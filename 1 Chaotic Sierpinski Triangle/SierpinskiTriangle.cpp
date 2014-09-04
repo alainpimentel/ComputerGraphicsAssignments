@@ -32,7 +32,7 @@ int random(int m) {
 }
 
 // Displays the Sierpinski Triangle
-void sierpinski_render(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3, GLintPoint seed) {
+void sierpinskiRender(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3, GLintPoint seed) {
 	glClear(GL_COLOR_BUFFER_BIT); // clear the screen
 	GLintPoint T[3] = { { corner1.x, corner1.y }, { corner2.x, corner2.y }, { corner3.x, corner3.y } }; // vertices of the triangle
 
@@ -59,13 +59,13 @@ void myKeyboard(unsigned char ch, int, int) {
 			numberDots *= 2;
 			if (numberDots > 1048756)
 				numberDots = 1048756;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[4]);
 		}
 		else if (ch == 'D') {
 			numberDots /= 2;
 			if (numberDots < 256)
 				numberDots = 256;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[4]);
 		}
 	}
 }
@@ -78,7 +78,7 @@ void myMouse(int button, int state, int x, int y) {
 		corner[numCorners].x = x;
 		corner[numCorners].y = screenHeight - y;
 		if (++numCorners == 4) {
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[4]);
 			numCorners = 0;
 		}
 	}
