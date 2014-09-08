@@ -39,8 +39,8 @@ void sierpinskiRender(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3
 	glClear(GL_COLOR_BUFFER_BIT); // clear the screen
 	//glClearColor(1.0, 1.0, 1.0, 0.0);
 	GLintPoint T[3] = { { corner1.x, corner1.y }, { corner2.x, corner2.y }, { corner3.x, corner3.y } }; // vertices of the triangle
-	std::cout << corner1.x << "   " << corner1.y << "\n   " << corner2.x << "   " << corner2.y << "\n   " << 
-		corner3.x << "   " << corner3.y << seed.x << "   " << seed.y << std::endl;
+	//std::cout << corner1.x << "   " << corner1.y << "\n   " << corner2.x << "   " << corner2.y << "\n   " << 
+		//corner3.x << "   " << corner3.y << seed.x << "   " << seed.y << std::endl;
 	for (int i = 0; i < numberDots; i++) {
 		int index = random(3);
 		GLint x = (seed.x + T[index].x) / 2; // generate midpoint between randomly chosen vertice and seed
@@ -54,7 +54,7 @@ void sierpinskiRender(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3
 
 
 void myKeyboard(unsigned char ch, int, int) {
-	std::cout << "You pressed " << ch << std::endl;
+	//std::cout << "You pressed " << ch << std::endl;
 	if (corner != NULL) {
 		if (ch == 'U') { // Double the number of dots up to 1048756
 			numberDots *= 2;
@@ -72,44 +72,31 @@ void myKeyboard(unsigned char ch, int, int) {
 			numCorners = 0;
 			glClear(GL_COLOR_BUFFER_BIT); 
 			glFlush();
-			sierpinskiRender(corner[0], corner[1], corner[2], corner[2]);
 		}
 	}
 }
 
 void myMouse(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) { // Controls single clicks to draw the triangle
-		std::cout << numCorners << std::endl;
+		//std::cout << numCorners << std::endl;
 		corner[numCorners].x = x;
 		corner[numCorners].y = screenHeight - y;
 		if (++numCorners == 4) { // if four clicks were saved, draw triangle
 			sierpinskiRender(corner[0], corner[1], corner[2], corner[3]);
-			numCorners = 0;
 		}
 	}
-	/*else if (dragging && button == GLUT_LEFT_BUTTON && state == GLUT_UP) { // Controls when the user lets go of the left click
+	else if (dragging && button == GLUT_LEFT_BUTTON && state == GLUT_UP) { // Controls when the user lets go of the left click
 		// draws a new triangle if a point was moved
 		if (draggingPoint > -1 && numCorners > 4) { // Only drag when all points have been inputted
-			GLintPoint newPoint = { x, screenHeight - y }; // point to be moved
-			if (draggingPoint == 0) 
-				corner[0] = newPoint;
-			else if (draggingPoint == 1)
-				corner[1] = newPoint;
-			else if (draggingPoint == 2)
-				corner[2] = newPoint;
-			else if (draggingPoint == 3)
-				corner[3] = newPoint;
-
-			sierpinski_render(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
-
 			dragging = false; // user can drag a new point
 			draggingPoint = -1;
 		}
-	}*/
+	}
 }
 
 // Dragging motion
 void myMovedMouse(int x, int y) {
+	std::cout << draggingPoint << std::endl;
 	if (corner != NULL && !dragging && numCorners > 4) { // if the user is already draggin, dont do anything
 		int stdX = 10; // add a bigger area to make it easier to drag a point
 		int stdY = 10;
@@ -135,7 +122,7 @@ void myMovedMouse(int x, int y) {
 			dragging = true;
 		}
 	}
-	if (draggingPoint > -1 && numCorners > 4) { // Only drag when all points have been inputted
+	else if (draggingPoint > -1 && numCorners > 4) { // Only drag when all points have been inputted
 		GLintPoint newPoint = { x, screenHeight - y }; // point to be moved
 		if (draggingPoint == 0)
 			corner[0] = newPoint;
@@ -148,8 +135,7 @@ void myMovedMouse(int x, int y) {
 
 		sierpinskiRender(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
 
-		dragging = false; // user can drag a new point
-		draggingPoint = -1;
+		
 	}
 
 }
