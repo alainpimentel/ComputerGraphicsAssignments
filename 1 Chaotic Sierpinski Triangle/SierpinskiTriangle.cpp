@@ -5,14 +5,17 @@
 
 /* QIUESTION 
  *
- * 1. If the user pressed D or U at the middle of choosing points, what should happen? redraw at that point or just adjust current triangle
+ * 1. Display dots when they are clicked
+ * 2. 
  * TODO: drag a point to a new position
  */
 
-const int screenHeight = 600;
-const int screenWidth = 800;
-int numberDots = 256;
-static int numCorners = 0;
+const int screenWidth = 1200;
+const int screenHeight = 900;
+int numberDots = 256; // COntrols how many dots to draw for the triangle
+static int numCorners = 0; // Keeps track of how many corners have been inputted
+bool dragging = false; // flag to control the draggin state
+int draggingPoint = -1; // -1 means no point is being dragged. Use 0 - 2 depending on which point is being dragged
 
 // Holds a point
 struct GLintPoint{
@@ -34,20 +37,18 @@ int random(int m) {
 // Displays the Sierpinski Triangle
 void sierpinski_render(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3, GLintPoint seed) {
 	glClear(GL_COLOR_BUFFER_BIT); // clear the screen
+	//glClearColor(1.0, 1.0, 1.0, 0.0);
 	GLintPoint T[3] = { { corner1.x, corner1.y }, { corner2.x, corner2.y }, { corner3.x, corner3.y } }; // vertices of the triangle
-
-	/*int index = rand() % 3; // choose the initial vertex randomly
-	GLintPoint point = T[index];
-	drawDot(point.x, point.y);
-	*/
+	std::cout << corner1.x << "   " << corner1.y << "\n   " << corner2.x << "   " << corner2.y << "\n   " << 
+		corner3.x << "   " << corner3.y << seed.x << "   " << seed.y << std::endl;
 	for (int i = 0; i < numberDots; i++) {
 		int index = random(3);
-		GLint x = (seed.x + T[index].x) / 2;
+		GLint x = (seed.x + T[index].x) / 2; // generate midpoint between randomly chosen vertice and seed
 		GLint y = (seed.y + T[index].y) / 2;
 		drawDot(x, y);
-		seed = { x, y };
+		seed = { x, y }; // the seed becomes the midpoint
 	}
-	glFlush();
+	glFlush(); // draw the new triangle
 }
 
 
@@ -55,42 +56,100 @@ void sierpinski_render(GLintPoint corner1, GLintPoint corner2, GLintPoint corner
 void myKeyboard(unsigned char ch, int, int) {
 	std::cout << "You pressed " << ch << std::endl;
 	if (corner != NULL) {
-		if (ch == 'U') {
+		if (ch == 'U') { // Double the number of dots up to 1048756
 			numberDots *= 2;
 			if (numberDots > 1048756)
 				numberDots = 1048756;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
+			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
 		}
-		else if (ch == 'D') {
+		else if (ch == 'D') { // Divide the number of dots by 2 up to 256
 			numberDots /= 2;
 			if (numberDots < 256)
 				numberDots = 256;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
+			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
+		}
+		else if (ch == 'C') { // Clear the screen, reset the number of corners
+			numCorners = 0;
+			glClear(GL_COLOR_BUFFER_BIT); 
+			glFlush();
 		}
 	}
 }
 
 void myMouse(int button, int state, int x, int y) {
-	std::cout << "DOWNs\n";
-	
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-		std::cout << "DOWN\n";
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) { // Controls single clicks to draw the triangle
+		std::cout << numCorners << std::endl;
 		corner[numCorners].x = x;
 		corner[numCorners].y = screenHeight - y;
-		if (++numCorners == 4) {
-			sierpinski_render(corner[0], corner[1], corner[2], corner[4]);
-			numCorners = 0;
+		if (++numCorners == 4) { // if four clicks were saved, draw triangle
+			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
 		}
 	}
-	glFlush();
+	/*else if (dragging && button == GLUT_LEFT_BUTTON && state == GLUT_UP) { // Controls when the user lets go of the left click
+		// draws a new triangle if a point was moved
+		if (draggingPoint > -1 && numCorners > 4) { // Only drag when all points have been inputted
+			GLintPoint newPoint = { x, screenHeight - y }; // point to be moved
+			if (draggingPoint == 0) 
+				corner[0] = newPoint;
+			else if (draggingPoint == 1)
+				corner[1] = newPoint;
+			else if (draggingPoint == 2)
+				corner[2] = newPoint;
+			else if (draggingPoint == 3)
+				corner[3] = newPoint;
+
+			sierpinski_render(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
+
+			dragging = false; // user can drag a new point
+			draggingPoint = -1;
+		}
+	}*/
 }
 
+// Dragging motion
 void myMovedMouse(int x, int y) {
-	std::cout << "Dragging\n";
-	if (corner != NULL) {
-		if (corner[0].x == x && corner[0].y == y)
-			std::cout << "Draggin first point\n";
+	if (corner != NULL && !dragging && numCorners > 4) { // if the user is already draggin, dont do anything
+		int stdX = 10; // add a bigger area to make it easier to drag a point
+		int stdY = 10;
+		// Check the selected point is within the desired area, if it change the necessary variables to draw the new triangle when the user lets go of the click
+		if ((corner[0].x - stdX <= x && x <= corner[0].x + stdX) && (corner[0].y - stdY <= screenHeight - y && screenHeight - y <= corner[0].y + stdY)) {
+			if (draggingPoint < 0)
+				draggingPoint = 0;
+			dragging = true;
+		}
+		else if ((corner[1].x - stdX <= x && x <= corner[1].x + stdX) && (corner[1].y - stdY <= screenHeight - y && screenHeight - y <= corner[1].y + stdY)) {
+			if (draggingPoint < 0)
+				draggingPoint = 1;
+			dragging = true;
+		}
+		else if ((corner[2].x - stdX <= x && x <= corner[2].x + stdX) && (corner[2].y - stdY <= screenHeight - y && screenHeight - y <= corner[2].y + stdY)) {
+			if (draggingPoint < 0)
+				draggingPoint = 2;
+			dragging = true;
+		}
+		else if ((corner[3].x - stdX <= x && x <= corner[3].x + stdX) && (corner[3].y - stdY <= screenHeight - y && screenHeight - y <= corner[3].y + stdY)) {
+			if (draggingPoint < 0)
+				draggingPoint = 3;
+			dragging = true;
+		}
 	}
+	if (draggingPoint > -1 && numCorners > 4) { // Only drag when all points have been inputted
+		GLintPoint newPoint = { x, screenHeight - y }; // point to be moved
+		if (draggingPoint == 0)
+			corner[0] = newPoint;
+		else if (draggingPoint == 1)
+			corner[1] = newPoint;
+		else if (draggingPoint == 2)
+			corner[2] = newPoint;
+		else if (draggingPoint == 3)
+			corner[3] = newPoint;
+
+		sierpinski_render(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
+
+		dragging = false; // user can drag a new point
+		draggingPoint = -1;
+	}
+
 }
 
 // Initializes various values
@@ -104,7 +163,8 @@ void myInit() {
 }
 
 void stuff() {
-
+	glClear(GL_COLOR_BUFFER_BIT); // clear the screen
+	glFlush();
 }
 
 int main(int argc, char** argv) {
