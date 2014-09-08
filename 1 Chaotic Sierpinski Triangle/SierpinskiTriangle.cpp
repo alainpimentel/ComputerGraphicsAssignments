@@ -35,7 +35,7 @@ int random(int m) {
 }
 
 // Displays the Sierpinski Triangle
-void sierpinski_render(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3, GLintPoint seed) {
+void sierpinskiRender(GLintPoint corner1, GLintPoint corner2, GLintPoint corner3, GLintPoint seed) {
 	glClear(GL_COLOR_BUFFER_BIT); // clear the screen
 	//glClearColor(1.0, 1.0, 1.0, 0.0);
 	GLintPoint T[3] = { { corner1.x, corner1.y }, { corner2.x, corner2.y }, { corner3.x, corner3.y } }; // vertices of the triangle
@@ -60,18 +60,19 @@ void myKeyboard(unsigned char ch, int, int) {
 			numberDots *= 2;
 			if (numberDots > 1048756)
 				numberDots = 1048756;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[3]);
 		}
 		else if (ch == 'D') { // Divide the number of dots by 2 up to 256
 			numberDots /= 2;
 			if (numberDots < 256)
 				numberDots = 256;
-			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[3]);
 		}
 		else if (ch == 'C') { // Clear the screen, reset the number of corners
 			numCorners = 0;
 			glClear(GL_COLOR_BUFFER_BIT); 
 			glFlush();
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[2]);
 		}
 	}
 }
@@ -82,7 +83,8 @@ void myMouse(int button, int state, int x, int y) {
 		corner[numCorners].x = x;
 		corner[numCorners].y = screenHeight - y;
 		if (++numCorners == 4) { // if four clicks were saved, draw triangle
-			sierpinski_render(corner[0], corner[1], corner[2], corner[3]);
+			sierpinskiRender(corner[0], corner[1], corner[2], corner[3]);
+			numCorners = 0;
 		}
 	}
 	/*else if (dragging && button == GLUT_LEFT_BUTTON && state == GLUT_UP) { // Controls when the user lets go of the left click
@@ -144,7 +146,7 @@ void myMovedMouse(int x, int y) {
 		else if (draggingPoint == 3)
 			corner[3] = newPoint;
 
-		sierpinski_render(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
+		sierpinskiRender(corner[0], corner[1], corner[2], corner[3]); // redraw triangle with the new point
 
 		dragging = false; // user can drag a new point
 		draggingPoint = -1;
